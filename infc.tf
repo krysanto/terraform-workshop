@@ -31,10 +31,21 @@ resource "aws_subnet" "my_subnet" {
   map_public_ip_on_launch = true
 }
 
+resource "aws_subnet" "my_subnet_2" {
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b" # Make sure this is different from the first subnet
+  map_public_ip_on_launch = true
+}
 
 # Associate Subnet with Route Table
 resource "aws_route_table_association" "my_route_table_association" {
   subnet_id      = aws_subnet.my_subnet.id
+  route_table_id = aws_route_table.my_route_table.id
+}
+
+resource "aws_route_table_association" "my_route_table_association_2" {
+  subnet_id      = aws_subnet.my_subnet_2.id
   route_table_id = aws_route_table.my_route_table.id
 }
 
@@ -92,7 +103,7 @@ resource "aws_lb" "web_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.web_server.id]
-  subnets            = [aws_subnet.my_subnet.id]
+  subnets            = [aws_subnet.my_subnet.id, aws_subnet.my_subnet_2.id] # Include both subnets
 }
 
 # Target Group for Load Balancer
