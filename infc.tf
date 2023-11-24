@@ -1,11 +1,7 @@
 # Specify the AWS provider with your region and AWS credentials
 provider "aws" {
   region = "us-east-1"
-  # Add your AWS access key and secret key here. You can find these
-  # credentials on the Learner Lab Dashboard (just like the previous Workshop)
-  access_key = "[aws_access_key_id]"
-  secret_key = "[aws_secret_access_key]" 
-  token = "[aws_session_token]"
+  # Add your AWS access key and secret key here.
 }
 
 
