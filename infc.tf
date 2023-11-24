@@ -1,0 +1,139 @@
+# Specify the AWS provider with your region and AWS credentials
+provider "aws" {
+  region = "us-east-1"
+  # Add your AWS access key and secret key here. You can find these
+  # credentials on the Learner Lab Dashboard (just like the previous Workshop)
+  access_key = "[aws_access_key_id]"
+  secret_key = "[aws_secret_access_key]" 
+  token = "[aws_session_token]"
+}
+
+
+# Create VPC
+resource "aws_vpc" "my_vpc" {
+  cidr_block = "10.0.0.0/16"
+}
+
+
+# Create Internet Gateway
+resource "aws_internet_gateway" "my_igw" {
+  vpc_id = aws_vpc.my_vpc.id
+}
+
+
+# Create Custom Route Table
+resource "aws_route_table" "my_route_table" {
+  vpc_id = aws_vpc.my_vpc.id
+}
+
+
+# Create Subnet
+resource "aws_subnet" "my_subnet" {
+  vpc_id                  = aws_vpc.my_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a" # Adjust the availability zone accordingly
+  map_public_ip_on_launch = true
+}
+
+
+# Associate Subnet with Route Table
+resource "aws_route_table_association" "my_route_table_association" {
+  subnet_id      = aws_subnet.my_subnet.id
+  route_table_id = aws_route_table.my_route_table.id
+}
+
+
+# Create a security group
+resource "aws_security_group" "web_server" {
+  name        = "web-server-sg"
+  description = "Security group for the web server"
+ 
+  # Allow incoming traffic on port 80 (HTTP)
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  # Allow outgoing traffic to all destinations
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Create Multiple EC2 Instances
+variable "instance_count" {
+  description = "Number of instances to create"
+  default     = 2
+}
+
+resource "aws_instance" "web_server" {
+  count                  = var.instance_count
+  ami                    = "ami-0fc5d935ebf8bc3bc"
+  instance_type          = "t2.micro"
+  associate_public_ip_address = true
+
+  user_data = <<-EOF
+                #!/bin/bash
+                sudo apt-get update
+                sudo apt-get install -y apache2
+                sudo systemctl start apache2
+                sudo systemctl enable apache2
+                echo "<h1>Hello from Instance ${count.index}</h1>" | sudo tee /var/www/html/index.html
+                EOF
+
+  vpc_security_group_ids = [aws_security_group.web_server.id]
+}
+
+# Create Application Load Balancer
+resource "aws_lb" "web_lb" {
+  name               = "web-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.web_server.id]
+  subnets            = [aws_subnet.my_subnet.id]
+}
+
+# Target Group for Load Balancer
+resource "aws_lb_target_group" "web_tg" {
+  name     = "web-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.my_vpc.id
+}
+
+# Register Targets
+resource "aws_lb_target_group_attachment" "web_tg_attachment" {
+  count            = var.instance_count
+  target_group_arn = aws_lb_target_group.web_tg.arn
+  target_id        = element(aws_instance.web_server.*.id, count.index)
+  port             = 80
+}
+
+# Listener for Load Balancer
+resource "aws_lb_listener" "web_listener" {
+  load_balancer_arn = aws_lb.web_lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web_tg.arn
+  }
+}
+
+# Output the Load Balancer DNS
+output "lb_dns" {
+  value = aws_lb.web_lb.dns_name
+}
+
+
+# Output the public DNS address of the instance
+output "public_dns" {
+  value = aws_instance.infc_ws_terraform_2_web_server.public_dns
+}
