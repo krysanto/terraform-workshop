@@ -123,13 +123,11 @@ resource "aws_lb_listener" "web_listener" {
   }
 }
 
-# Output the Load Balancer DNS
 output "lb_dns" {
   value = aws_lb.web_lb.dns_name
 }
 
-
-# Output the public DNS address of the instance
+# Output the public DNS addresses of the instances
 output "public_dns" {
-  value = aws_instance.web_server.public_dns
+  value = [for instance in aws_instance.web_server : instance.public_dns]
 }
