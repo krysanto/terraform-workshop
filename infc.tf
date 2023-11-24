@@ -131,5 +131,5 @@ output "lb_dns" {
 
 # Output the public DNS address of the instance
 output "public_dns" {
-  value = aws_instance.infc_ws_terraform_2_web_server.public_dns
+  value = aws_instance.web_server.public_dns
 }
