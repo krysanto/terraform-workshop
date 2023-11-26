@@ -43,7 +43,6 @@ resource "aws_route_table" "my_route_table" {
   }
 }
 
-
 # Create Subnet
 resource "aws_subnet" "my_subnet" {
   vpc_id                  = aws_vpc.my_vpc.id
@@ -120,7 +119,7 @@ resource "aws_instance" "web_server" {
   count                  = var.instance_count
   ami                    = "ami-0fc5d935ebf8bc3bc"
   instance_type          = "t2.micro"
-  subnet_id = count.index % 2 == 0 ? aws_subnet.my_subnet.id : aws_subnet.my_subnet_2.id
+  subnet_id = count.index % 2 == 0 ? aws_subnet.my_subnet_2.id : aws_subnet.my_subnet.id
   associate_public_ip_address = true
   tags = {
     Name = "Terraform Workshop"
