@@ -1,3 +1,15 @@
+# Add a s3 bucket backend, so that we can sync terraform state
+
+terraform {
+  backend "s3" {
+    bucket         = "terraform-state-infc"
+    key            = "state/terraform.tfstate"   # Path in the bucket
+    region         = "us-east-1"
+    dynamodb_table = "terraform-lock-table"   # Replace with your DynamoDB table name
+    encrypt        = true
+  }
+}
+
 # Specify the AWS provider with your region and AWS credentials
 provider "aws" {
   region = "us-east-1"
