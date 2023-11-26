@@ -1,5 +1,4 @@
 # Add a s3 bucket backend, so that we can sync terraform state
-
 terraform {
   backend "s3" {
     bucket         = "terraform-state-infc"
