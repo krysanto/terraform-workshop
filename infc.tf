@@ -63,13 +63,13 @@ resource "aws_subnet" "my_subnet_2" {
     Name = "Terraform Workshop"
   }
 }
-
-# Accociate the new route table to our VPC, instead of using the default one
+/*
+# Associate the new route table to our VPC, instead of using the default one
 resource "aws_main_route_table_association" "my_main_route_table_association" {
   vpc_id          = aws_vpc.my_vpc.id
   route_table_id  = aws_route_table.my_route_table.id
 }
-
+*/
 # Associate Subnet with Route Table
 resource "aws_route_table_association" "my_route_table_association" {
   subnet_id      = aws_subnet.my_subnet.id
