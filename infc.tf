@@ -69,6 +69,7 @@ resource "aws_route_table_association" "my_route_table_association_2" {
 resource "aws_security_group" "web_server" {
   name        = "web-server-sg"
   description = "Security group for the web server"
+  vpc_id      = aws_vpc.my_vpc.id
   tags = {
     Name = "Terraform Workshop"
   }
