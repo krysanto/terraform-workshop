@@ -8,18 +8,27 @@ provider "aws" {
 # Create VPC
 resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "Terraform Workshop"
+  }
 }
 
 
 # Create Internet Gateway
 resource "aws_internet_gateway" "my_igw" {
   vpc_id = aws_vpc.my_vpc.id
+  tags = {
+    Name = "Terraform Workshop"
+  }
 }
 
 
 # Create Custom Route Table
 resource "aws_route_table" "my_route_table" {
   vpc_id = aws_vpc.my_vpc.id
+  tags = {
+    Name = "Terraform Workshop"
+  }
 }
 
 
@@ -29,6 +38,9 @@ resource "aws_subnet" "my_subnet" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a" # Adjust the availability zone accordingly
   map_public_ip_on_launch = true
+  tags = {
+    Name = "Terraform Workshop"
+  }
 }
 
 resource "aws_subnet" "my_subnet_2" {
@@ -36,6 +48,9 @@ resource "aws_subnet" "my_subnet_2" {
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "us-east-1b" # Make sure this is different from the first subnet
   map_public_ip_on_launch = true
+  tags = {
+    Name = "Terraform Workshop"
+  }
 }
 
 # Associate Subnet with Route Table
@@ -54,6 +69,9 @@ resource "aws_route_table_association" "my_route_table_association_2" {
 resource "aws_security_group" "web_server" {
   name        = "web-server-sg"
   description = "Security group for the web server"
+  tags = {
+    Name = "Terraform Workshop"
+  }
  
   # Allow incoming traffic on port 80 (HTTP)
   ingress {
@@ -84,6 +102,9 @@ resource "aws_instance" "web_server" {
   ami                    = "ami-0fc5d935ebf8bc3bc"
   instance_type          = "t2.micro"
   associate_public_ip_address = true
+  tags = {
+    Name = "Terraform Workshop"
+  }
 
   user_data = <<-EOF
                 #!/bin/bash
@@ -104,6 +125,9 @@ resource "aws_lb" "web_lb" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.web_server.id]
   subnets            = [aws_subnet.my_subnet.id, aws_subnet.my_subnet_2.id] # Include both subnets
+  tags = {
+    Name = "Terraform Workshop"
+  }
 }
 
 # Target Group for Load Balancer
