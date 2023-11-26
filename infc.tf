@@ -102,6 +102,7 @@ resource "aws_instance" "web_server" {
   count                  = var.instance_count
   ami                    = "ami-0fc5d935ebf8bc3bc"
   instance_type          = "t2.micro"
+  vpc_id                 = aws_vpc.my_vpc.id
   associate_public_ip_address = true
   tags = {
     Name = "Terraform Workshop"
