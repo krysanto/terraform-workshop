@@ -62,13 +62,13 @@ resource "aws_subnet" "my_subnet_2" {
     Name = "Terraform Workshop"
   }
 }
-/*
+
 # Associate the new route table to our VPC, instead of using the default one
 resource "aws_main_route_table_association" "my_main_route_table_association" {
   vpc_id          = aws_vpc.my_vpc.id
   route_table_id  = aws_route_table.my_route_table.id
 }
-*/
+
 # Associate Subnet with Route Table
 resource "aws_route_table_association" "my_route_table_association" {
   subnet_id      = aws_subnet.my_subnet.id
@@ -122,7 +122,7 @@ resource "aws_instance" "web_server" {
   tags = {
     Name = "Terraform Workshop"
   }
-  //subnet_id = count.index % 2 == 0 ? aws_subnet.my_subnet.id : aws_subnet.my_subnet_2.id
+  subnet_id = count.index % 2 == 0 ? aws_subnet.my_subnet.id : aws_subnet.my_subnet_2.id
 
   user_data = <<-EOF
                 #!/bin/bash
