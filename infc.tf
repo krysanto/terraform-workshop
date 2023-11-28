@@ -82,7 +82,7 @@ resource "aws_route_table_association" "my_route_table_association_2" {
 
 
 # Create a security group
-resource "aws_security_group" "web_server" {
+resource "aws_security_group" "web_server-sg" {
   name        = "web-server-sg"
   description = "Security group for the web server"
   vpc_id      = aws_vpc.my_vpc.id
@@ -133,7 +133,7 @@ resource "aws_instance" "web_server" {
                 echo "<h1>Hello from Instance ${count.index}</h1>" | sudo tee /var/www/html/index.html
                 EOF
 
-  vpc_security_group_ids = [aws_security_group.web_server.id]
+  vpc_security_group_ids = [aws_security_group.web_server-sg.id]
 }
 /*
 # Create Application Load Balancer
@@ -141,7 +141,7 @@ resource "aws_lb" "web_lb" {
   name               = "web-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.web_server.id]
+  security_groups    = [aws_security_group.web_server-sg.id]
   subnets            = [aws_subnet.my_subnet.id, aws_subnet.my_subnet_2.id] # Include both subnets
   tags = {
     Name = "Terraform Workshop"
