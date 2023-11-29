@@ -116,13 +116,13 @@ variable "instance_count" {
 
 resource "aws_instance" "web_server" {
   count                  = var.instance_count
-  ami                    = "ami-06aa3f7caf3a30282"
+  ami                    = "ami-0fc5d935ebf8bc3bc"
   instance_type          = "t2.micro"
   associate_public_ip_address = true
   tags = {
     Name = "Terraform Workshop"
   }
-  subnet_id = count.index % 2 == 0 ? aws_subnet.my_subnet.id : aws_subnet.my_subnet_2.id
+  subnet_id = count % 2 == 0 ? aws_subnet.my_subnet.id : aws_subnet.my_subnet_2.id
 
   user_data = <<-EOF
                 #!/bin/bash
