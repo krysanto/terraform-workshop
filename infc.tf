@@ -116,7 +116,7 @@ variable "instance_count" {
 
 resource "aws_instance" "web_server" {
   count                  = var.instance_count
-  ami                    = "ami-0fc5d935ebf8bc3bc"
+  ami                    = "ami-06aa3f7caf3a30282"
   instance_type          = "t2.micro"
   associate_public_ip_address = true
   tags = {
@@ -135,7 +135,7 @@ resource "aws_instance" "web_server" {
 
   vpc_security_group_ids = [aws_security_group.web_server-sg.id]
 }
-
+/*
 # Create Application Load Balancer
 resource "aws_lb" "web_lb" {
   name               = "web-lb"
@@ -179,7 +179,7 @@ resource "aws_lb_listener" "web_listener" {
 output "lb_dns" {
   value = aws_lb.web_lb.dns_name
 }
-
+*/
 # Output the public DNS addresses of the instances
 output "public_dns" {
   value = [for instance in aws_instance.web_server : instance.public_dns]
