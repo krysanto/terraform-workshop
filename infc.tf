@@ -1,11 +1,10 @@
-# Add a s3 bucket backend, so that we can sync terraform state
 terraform {
-  backend "s3" {
-    bucket         = "terraform-state-infc"
-    key            = "state/terraform.tfstate"   # Path in the bucket
-    region         = "us-east-1"
-    dynamodb_table = "terraform-lock-table"
-    encrypt        = true
+  # Use latest version
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.28"
+    }
   }
 }
 
@@ -22,6 +21,9 @@ resource "aws_vpc" "my_vpc" {
   tags = {
     Name = "Terraform Workshop"
   }
+  # Enable DNS Support
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 }
 
 
@@ -37,6 +39,10 @@ resource "aws_internet_gateway" "my_igw" {
 # Create Custom Route Table
 resource "aws_route_table" "my_route_table" {
   vpc_id = aws_vpc.my_vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.my_igw.id
+  }
   tags = {
     Name = "Terraform Workshop"
   }
@@ -46,13 +52,14 @@ resource "aws_route_table" "my_route_table" {
 resource "aws_subnet" "my_subnet" {
   vpc_id                  = aws_vpc.my_vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a" # Adjust the availability zone accordingly
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
   tags = {
     Name = "Terraform Workshop"
   }
 }
 
+# 2nd Subnet
 resource "aws_subnet" "my_subnet_2" {
   vpc_id                  = aws_vpc.my_vpc.id
   cidr_block              = "10.0.2.0/24"
@@ -75,11 +82,11 @@ resource "aws_route_table_association" "my_route_table_association" {
   route_table_id = aws_route_table.my_route_table.id
 }
 
+# Associate Subnet with Route Table
 resource "aws_route_table_association" "my_route_table_association_2" {
   subnet_id      = aws_subnet.my_subnet_2.id
   route_table_id = aws_route_table.my_route_table.id
 }
-
 
 # Create a security group
 resource "aws_security_group" "web_server_sg" {
@@ -135,7 +142,7 @@ resource "aws_instance" "web_server" {
 
   vpc_security_group_ids = [aws_security_group.web_server_sg.id]
 }
-/*
+
 # Create Application Load Balancer
 resource "aws_lb" "web_lb" {
   name               = "web-lb"
@@ -179,7 +186,7 @@ resource "aws_lb_listener" "web_listener" {
 output "lb_dns" {
   value = aws_lb.web_lb.dns_name
 }
-*/
+
 # Output the public DNS addresses of the instances
 output "public_dns" {
   value = [for instance in aws_instance.web_server : instance.public_dns]
