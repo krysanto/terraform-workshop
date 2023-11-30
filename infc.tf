@@ -6,6 +6,13 @@ terraform {
       version = "~> 5.28"
     }
   }
+  backend "s3" {
+    bucket         = "terraform-state-infc"
+    key            = "state/terraform.tfstate"   # Path in the bucket
+    region         = "us-east-1"
+    dynamodb_table = "terraform-lock-table"
+    encrypt        = true
+  }
 }
 
 # Specify the AWS provider with your region and AWS credentials
@@ -72,8 +79,8 @@ resource "aws_subnet" "my_subnet_2" {
 
 # Associate the new route table to our VPC, instead of using the default one
 resource "aws_main_route_table_association" "my_main_route_table_association" {
-  vpc_id          = aws_vpc.my_vpc.id
-  route_table_id  = aws_route_table.my_route_table.id
+  vpc_id         = aws_vpc.my_vpc.id
+  route_table_id = aws_route_table.my_route_table.id
 }
 
 # Associate Subnet with Route Table
@@ -96,7 +103,7 @@ resource "aws_security_group" "web_server_sg" {
   tags = {
     Name = "Terraform Workshop"
   }
- 
+
   # Allow incoming traffic on port 80 (HTTP)
   ingress {
     from_port   = 80
@@ -122,9 +129,9 @@ variable "instance_count" {
 }
 
 resource "aws_instance" "web_server" {
-  count                  = var.instance_count
-  ami                    = "ami-0fc5d935ebf8bc3bc"
-  instance_type          = "t2.micro"
+  count                       = var.instance_count
+  ami                         = "ami-0fc5d935ebf8bc3bc"
+  instance_type               = "t2.micro"
   associate_public_ip_address = true
   tags = {
     Name = "Terraform Workshop"
